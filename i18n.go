@@ -1,10 +1,17 @@
-/**
+/*
 Simple i18n implement by "gopkg.in/ini.v1"
 Source code and other details for the project are available at GitHub:
 
    https://github.com/gookit/i18n
 
-usage:
+lang files:
+
+	conf/
+		lang/
+			en.ini
+			zh-CN.ini
+
+init:
 
     import "github/gookit/i18n"
 
@@ -16,7 +23,7 @@ usage:
 
     i18n.Init("conf/lang", "en", languages)
 
-ok, now:
+usage:
 
     // translate from special language
     val := i18n.Tr("en", "key")
@@ -30,6 +37,7 @@ package i18n
 import (
     "gopkg.in/ini.v1"
     "fmt"
+	"bytes"
     "strings"
     "log"
 )
@@ -40,8 +48,8 @@ type I18n struct {
     data map[string]*ini.File
     // default language name. eg. "en"
     defLang string
-    // spare language name. eg. "en"
-    spareLang string
+    // spare(fallback) language name. eg. "en"
+    // spareLang string
     // language files directory
     langDir string
     // language list {en:English, zh-CN:简体中文}
@@ -184,6 +192,19 @@ func (l *I18n) Tr(lang string, key string, args ...interface{}) string {
     }
 
     return val
+}
+
+// LangSource
+func (l *I18n) LangSource(lang string) string {
+    if _, ok := l.languages[lang]; ok {
+        return ""
+    }
+
+    var buf bytes.Buffer
+
+    l.data[lang].WriteTo(&buf)
+
+    return buf.String()
 }
 
 // HasLang
