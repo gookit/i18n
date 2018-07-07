@@ -1,5 +1,6 @@
 /*
 Simple i18n implement by "gopkg.in/ini.v1"
+
 Source code and other details for the project are available at GitHub:
 
    https://github.com/gookit/i18n
@@ -7,9 +8,9 @@ Source code and other details for the project are available at GitHub:
 lang files:
 
 	conf/
-		lang/
-			en.ini
-			zh-CN.ini
+	    lang/
+	        en.ini
+	        zh-CN.ini
 
 init:
 

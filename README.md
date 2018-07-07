@@ -11,6 +11,14 @@ use `ini` files, simple i18n manager implement.
 
 ## Usage
 
+```text
+conf/
+    lang/
+        en.ini
+        zh-CN.ini
+        ...
+```
+
 - init
 
 ```go
