@@ -17,4 +17,8 @@ func main()  {
 
 	fmt.Printf("name %s\n", i18n.Tr("en", "name"))
 	fmt.Printf("name %s\n", i18n.Tr("zh-CN", "name"))
+
+	// Output:
+	// name Blog
+	// name 博客
 }

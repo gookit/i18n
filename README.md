@@ -27,7 +27,7 @@ conf/
     languages := map[string]string{
         "en": "English",
         "zh-CN": "简体中文",
-        "zh-TW": "繁体中文",
+        // "zh-TW": "繁体中文",
     }
 
     i18n.Init("conf/lang", "en", languages)
@@ -37,15 +37,15 @@ conf/
 
 ```go
     // translate from special language
-    val := i18n.Tr("en", "key")
+    str := i18n.Tr("en", "key")
 
     // translate from default language
-    val := i18n.DefTr("key")
+    str = i18n.DefTr("key")
 ```
 
 ## dep packages
 
-- [go-ini](https://gopkg.in/ini.v1) ini 解析
+- [gookit/ini](https://github.com/gookit/ini) ini 解析管理
 
 ## License
 
