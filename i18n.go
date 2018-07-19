@@ -1,5 +1,5 @@
 /*
-Simple i18n implement by "gopkg.in/ini.v1"
+Simple i18n manage, use INI format file
 
 Source code and other details for the project are available at GitHub:
 
@@ -36,17 +36,16 @@ usage:
 package i18n
 
 import (
-    "gopkg.in/ini.v1"
     "fmt"
 	"bytes"
-    "strings"
     "log"
+	"github.com/gookit/ini"
 )
 
 // I18n
 type I18n struct {
     // languages data
-    data map[string]*ini.File
+    data map[string]*ini.Ini
     // default language name. eg. "en"
     defLang string
     // spare(fallback) language name. eg. "en"
@@ -62,12 +61,14 @@ type I18n struct {
 /************************************/
 
 // default instance
-var defI18n = &I18n{data: make(map[string]*ini.File, 0)}
+var defI18n = &I18n{data: make(map[string]*ini.Ini, 0)}
 
+// Tr
 func Tr(lang string, key string, args ...interface{}) string {
     return defI18n.Tr(lang, key, args...)
 }
 
+// DefTr
 func DefTr(key string, args ...interface{}) string {
     return defI18n.DefTr(key, args...)
 }
@@ -92,7 +93,7 @@ func DefI18n() *I18n {
 
 // NewEmpty
 func NewEmpty() *I18n {
-    return &I18n{data: make(map[string]*ini.File, 0)}
+    return &I18n{data: make(map[string]*ini.Ini, 0)}
 }
 
 // New
@@ -102,7 +103,7 @@ func New(langDir string, defLang string, languages map[string]string) *I18n {
         defLang:   defLang,
         languages: languages,
 
-        data: make(map[string]*ini.File, 0),
+        data: make(map[string]*ini.Ini, 0),
     }
 }
 
@@ -113,8 +114,7 @@ func New(langDir string, defLang string, languages map[string]string) *I18n {
 // Init load add language files
 func (l *I18n) Init() {
     for lang := range l.languages {
-        lData, err := ini.Load(l.langDir + "/" + lang + ".ini")
-
+        lData, err := ini.LoadFiles(l.langDir + "/" + lang + ".ini")
         if err != nil {
             log.Fatalf("Fail to load language: %s, error %s", lang, err.Error())
         }
@@ -131,8 +131,7 @@ func (l *I18n) Add(lang string, file string, name string) {
 
     // append data
     if ld, ok := l.data[lang]; ok {
-        err := ld.Append(langFile)
-
+        err := ld.LoadFiles(langFile)
         if err != nil {
             log.Fatalf("Fail to load language: %s, error %s", lang, err.Error())
         }
@@ -147,8 +146,7 @@ func (l *I18n) Add(lang string, file string, name string) {
 func (l *I18n) Set(lang string, file string, name string) {
     langFile := l.langDir + "/" + lang + ".ini"
 
-    lData, err := ini.Load(langFile)
-
+    lData, err := ini.LoadFiles(langFile)
     if err != nil {
         log.Fatalf("Fail to load language: %s, error %s", lang, err.Error())
     }
@@ -158,10 +156,10 @@ func (l *I18n) Set(lang string, file string, name string) {
 }
 
 // AddData
-func (l *I18n) AddData(lang string, dataSource interface{}) {
+func (l *I18n) AddData(lang string, dataSource map[string]ini.Section) {
     // append data
     if ld, ok := l.data[lang]; ok {
-    	ld.Append(dataSource)
+    	ld.LoadData(dataSource)
     }
 }
 
@@ -171,21 +169,17 @@ func (l *I18n) DefTr(key string, args ...interface{}) string {
 }
 
 // Tr translate from a lang by key
+// site.name => [site]
+//  			name = my blog
 func (l *I18n) Tr(lang string, key string, args ...interface{}) string {
     if !l.HasLang(lang) {
         return ""
     }
 
-    var val string
-
-    // site.name => [site]
-    //  			name = my blog
-    if strings.Contains(key, ".") {
-        nodes := strings.SplitN(key, ".", 2)
-        val = l.data[lang].Section(nodes[0]).Key(nodes[1]).String()
-    } else {
-        val = l.data[lang].Section("").Key(key).String()
-    }
+    val, ok := l.data[lang].Get(key)
+	if !ok {
+		return key
+	}
 
     // if has args
     if len(args) > 0 {
@@ -202,7 +196,6 @@ func (l *I18n) LangSource(lang string) string {
     }
 
     var buf bytes.Buffer
-
     l.data[lang].WriteTo(&buf)
 
     return buf.String()
