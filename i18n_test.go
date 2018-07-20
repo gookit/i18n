@@ -1,5 +1,6 @@
 package i18n
 
+// test cover details: https://gocover.io/github.com/gookit/i18n
 import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +29,7 @@ func Example() {
 	// use args: hello inhere, welcome
 }
 
-func TestDefI18n(t *testing.T) {
+func TestInstance(t *testing.T) {
 	st := assert.New(t)
 	languages := map[string]string{
 		"en":    "English",
@@ -38,7 +39,10 @@ func TestDefI18n(t *testing.T) {
 
 	Init("testdata", "en", languages)
 
-	st.Equal("Blog", DefI18n().Tr("en", "name"))
+	m := Instance()
+	st.IsType(new(I18n), m)
+
+	st.Equal("Blog", Tr("en", "name"))
 
 	st.Equal("Blog", Tr("en", "name"))
 	st.Equal("Blog", DefTr("name"))
@@ -76,7 +80,17 @@ func TestI18n(t *testing.T) {
 	str = m.Tr("zh-CN", "onlyInEn")
 	st.Equal("val0", str)
 
-	l := m.Lang("en")
+	str = m.Tr("no-lang", "argMsg", "inhere")
+	st.Contains(str, "inhere")
+
+	str = m.Tr("no-lang", "no-key")
+	st.Equal("no-key", str)
+
+	// get lang
+	l := m.Lang("no-lang")
+	st.Nil(l)
+
+	l = m.Lang("en")
 	st.NotNil(l)
 	st.Equal("Blog", l.MustString("name"))
 
@@ -89,13 +103,29 @@ func TestI18n_NewLang(t *testing.T) {
 	st := assert.New(t)
 
 	l := NewEmpty()
-	l.NewLang("en", "English")
+	l.Add("en", "English")
 
 	err := l.LoadFile("en", "testdata/en.ini")
 	st.Nil(err)
 
+	// invalid file path
+	err = l.LoadFile("en", "not-exist.ini")
+	st.Error(err)
+
+	// invalid data string
+	err = l.LoadString("en", "invalid string")
+	st.Error(err)
+
 	st.Equal("Blog", l.Tr("en", "name"))
 	st.Equal("name", l.DefTr("name"))
+
+	err = l.LoadFile("zh-CN", "testdata/zh-CN.ini")
+	st.Error(err)
+	err = l.LoadString("zh-CN", "name = 博客")
+	st.Error(err)
+	l.NewLang("zh-CN", "简体中文")
+	err = l.LoadString("zh-CN", "name = 博客")
+	st.Nil(err)
 
 	// set default lang
 	l.DefaultLang = "en"
@@ -113,6 +143,7 @@ func TestI18n_Export(t *testing.T) {
 	st.Nil(err)
 
 	st.Contains(m.Export("en"), "name = Blog")
+	st.Equal("", m.Export("no-lang"))
 }
 
 func TestI18n_LoadString(t *testing.T) {

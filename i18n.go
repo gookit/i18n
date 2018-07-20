@@ -66,8 +66,8 @@ type I18n struct {
 // default instance
 var defI18n = NewEmpty()
 
-// DefI18n get default i18n instance
-func DefI18n() *I18n {
+// Instance get default i18n instance
+func Instance() *I18n {
 	return defI18n
 }
 
