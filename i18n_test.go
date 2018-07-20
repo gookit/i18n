@@ -58,11 +58,17 @@ func TestI18n(t *testing.T) {
 	st.True(m.HasLang("zh-CN"))
 	st.False(m.HasLang("zh-TW"))
 
+	str := m.Tr("zh-TW", "key")
+	st.Equal("key", str)
+
+	st.True(m.HasKey("en", "onlyInEn"))
+	st.False(m.HasKey("zh-CN", "onlyInEn"))
+
 	ls := m.Languages()
 	st.Equal("English", ls["en"])
 
 	// use args
-	str := m.DefTr("argMsg", "inhere")
+	str = m.DefTr("argMsg", "inhere")
 	st.Contains(str, "inhere")
 
 	// fallback lang
@@ -97,7 +103,7 @@ func TestI18n_NewLang(t *testing.T) {
 	st.Equal("Blog", l.DefTr("name"))
 }
 
-func TestI18n_ToString(t *testing.T) {
+func TestI18n_Export(t *testing.T) {
 	st := assert.New(t)
 
 	m := NewEmpty()
@@ -106,7 +112,7 @@ func TestI18n_ToString(t *testing.T) {
 	err := m.LoadString("en", "name = Blog")
 	st.Nil(err)
 
-	st.Contains(m.ToString("en"), "name = Blog")
+	st.Contains(m.Export("en"), "name = Blog")
 }
 
 func TestI18n_LoadString(t *testing.T) {

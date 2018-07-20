@@ -168,6 +168,15 @@ func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 	return val
 }
 
+// HasKey
+func (l *I18n) HasKey(lang, key string) (ok bool) {
+	if !l.HasLang(lang) {
+		return
+	}
+	_, ok = l.data[lang].Get(key)
+	return
+}
+
 // translate from fallback language
 func (l *I18n) transFromFallback(key string) (val string) {
 	fb := l.FallbackLang
@@ -252,8 +261,8 @@ func (l *I18n) Lang(lang string) *ini.Ini {
 	return nil
 }
 
-// ToString
-func (l *I18n) ToString(lang string) string {
+// Export a language data as INI string
+func (l *I18n) Export(lang string) string {
 	if _, ok := l.languages[lang]; !ok {
 		return ""
 	}

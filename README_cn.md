@@ -2,20 +2,20 @@
 
 [![GoDoc](https://godoc.org/github.com/gookit/i18n?status.svg)](https://godoc.org/github.com/gookit/i18n)
 
-Use `ini` files, simple i18n manager implement.
+使用INI文件实现的语言数据管理使用。
 
-- easy to use，can load multi language, multi files
-- Support set default language, fallback language
-- Support parameter replacement
+- 使用简单，可加载多个语言，多个文件
+- 支持设置默认语言，备用语言
+- 支持参数替换
 
-> **[中文说明](README_cn.md)**
+> **[EN README](README.md)**
 
 ## Godoc
 
 - [godoc for gopkg](https://godoc.org/gopkg.in/gookit/i18n.v1)
 - [godoc for github](https://godoc.org/github.com/gookit/i18n)
 
-## Usage
+## 使用
 
 ```text
 conf/
@@ -25,7 +25,7 @@ conf/
         ...
 ```
 
-- init
+- 初始化
 
 ```go
     import "github/gookit/i18n"
@@ -36,21 +36,21 @@ conf/
         // "zh-TW": "繁体中文",
     }
 
-    // The default instance initialized directly here
+    // 这里直接初始化的默认实例
     i18n.Init("conf/lang", "en", languages)
     
-    // Create a custom new instance
+    // 创建自定义的新实例
     // i18n.New(langDir string, defLang string, languages)
     // i18n.NewEmpty()
 ```
 
-- usage
+- 使用
 
 ```go
-    // translate from special language
+    // 从指定的语言翻译
     msg := i18n.Tr("en", "key")
 
-    // translate from default language
+    // 从默认语言翻译
     msg = i18n.DefTr("key")
 ```
 
