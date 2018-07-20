@@ -1,6 +1,8 @@
 # i18n
 
 [![GoDoc](https://godoc.org/github.com/gookit/i18n?status.svg)](https://godoc.org/github.com/gookit/i18n)
+[![cover.run](https://cover.run/go/https:/github.com/gookit/i18n.svg?style=flat&tag=golang-1.10)](https://cover.run/go?tag=golang-1.10&repo=https%3A%2Fgithub.com%2Fgookit%2Fi18n)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gookit/i18n)](https://goreportcard.com/report/github.com/gookit/i18n)
 
 使用INI文件实现的语言数据管理使用。
 

@@ -32,15 +32,15 @@ usage:
     // translate from default language
     val := i18n.DefTr("key")
 
- */
+*/
 package i18n
 
 import (
-	"fmt"
 	"bytes"
-	"log"
-	"github.com/gookit/ini"
 	"errors"
+	"fmt"
+	"github.com/gookit/ini"
+	"log"
 )
 
 // I18n language manager

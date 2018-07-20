@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/gookit/i18n"
 	"fmt"
+	"github.com/gookit/i18n"
 )
 
 // go run ./examples/demo.go
-func main()  {
+func main() {
 	languages := map[string]string{
-		"en": "English",
+		"en":    "English",
 		"zh-CN": "简体中文",
 		// "zh-TW": "繁体中文",
 	}

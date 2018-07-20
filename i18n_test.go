@@ -2,13 +2,13 @@ package i18n
 
 import (
 	"fmt"
-	"testing"
 	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func Example() {
 	languages := map[string]string{
-		"en": "English",
+		"en":    "English",
 		"zh-CN": "简体中文",
 		// "zh-TW": "繁体中文",
 	}
@@ -31,7 +31,7 @@ func Example() {
 func TestDefI18n(t *testing.T) {
 	st := assert.New(t)
 	languages := map[string]string{
-		"en": "English",
+		"en":    "English",
 		"zh-CN": "简体中文",
 		// "zh-TW": "繁体中文",
 	}
@@ -49,7 +49,7 @@ func TestI18n(t *testing.T) {
 	st := assert.New(t)
 
 	languages := map[string]string{
-		"en": "English",
+		"en":    "English",
 		"zh-CN": "简体中文",
 		// "zh-TW": "繁体中文",
 	}
