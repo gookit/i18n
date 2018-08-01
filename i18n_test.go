@@ -68,6 +68,7 @@ func TestI18n(t *testing.T) {
 
 	st.True(m.HasKey("en", "onlyInEn"))
 	st.False(m.HasKey("zh-CN", "onlyInEn"))
+	st.False(m.HasKey("no-lang", "key"))
 
 	ls := m.Languages()
 	st.Equal("English", ls["en"])
@@ -80,6 +81,9 @@ func TestI18n(t *testing.T) {
 	m.FallbackLang = "en"
 	str = m.Tr("zh-CN", "onlyInEn")
 	st.Equal("val0", str)
+
+	str = m.Tr("zh-CN", "noKey")
+	st.Equal("noKey", str)
 
 	str = m.Tr("no-lang", "argMsg", "inhere")
 	st.Contains(str, "inhere")
