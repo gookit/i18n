@@ -269,10 +269,10 @@ func (l *I18n) Add(lang string, name string) {
 // 	i18n.NewLang("zh-CN", "简体中文")
 func (l *I18n) NewLang(lang string, name string) {
 	// lang exist
-	if _, ok := l.languages; ok {
+	if _, ok := l.languages[lang]; ok {
 		return
 	}
-	
+
 	l.data[lang] = ini.New()
 	l.languages[lang] = name
 }

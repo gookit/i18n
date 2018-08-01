@@ -181,6 +181,8 @@ func TestI18n_Export(t *testing.T) {
 	st := assert.New(t)
 
 	m := NewEmpty()
+	m.Add("en", "English")
+	// repeat
 	m.NewLang("en", "English")
 
 	err := m.LoadString("en", "name = Blog")
