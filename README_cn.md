@@ -57,7 +57,13 @@ conf/
     msg = i18n.DefTr("key")
 ```
 
-## dep packages
+## 测试
+
+```bash
+go test -cover
+```
+
+## Dep packages
 
 - [gookit/ini](https://github.com/gookit/ini) ini 解析管理
 

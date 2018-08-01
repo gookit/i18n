@@ -61,6 +61,7 @@ func TestI18n(t *testing.T) {
 	m := NewWithInit("testdata", "en", languages)
 	st.True(m.HasLang("zh-CN"))
 	st.False(m.HasLang("zh-TW"))
+	st.Equal(SingleFile, m.LoadMode)
 
 	str := m.Tr("zh-TW", "key")
 	st.Equal("key", str)
@@ -97,6 +98,48 @@ func TestI18n(t *testing.T) {
 	ok := m.DelLang("zh-CN")
 	st.True(ok)
 	st.False(m.HasLang("zh-CN"))
+
+	st.Panics(func() {
+		languages["not-exist"] = "not-Exist"
+		NewWithInit("testdata", "en", languages)
+	})
+}
+
+func TestMultiFile(t *testing.T) {
+	st := assert.New(t)
+	languages := map[string]string{
+		"en":    "English",
+		"zh-CN": "简体中文",
+		// "zh-TW": "繁体中文",
+	}
+
+	m := New("testdata", "en", languages)
+	// setting
+	m.LoadMode = MultiFile
+	m.Init()
+
+	st.True(m.HasLang("zh-CN"))
+	st.False(m.HasLang("zh-TW"))
+	st.Equal(MultiFile, m.LoadMode)
+
+	st.Equal("inhere", m.DefTr("name"))
+	st.Equal("语言管理", m.Tr("zh-CN", "use-for"))
+
+	st.Panics(func() {
+		m := New("testdata", "en", languages)
+		// setting invalid mode
+		m.LoadMode = 3
+		m.Init()
+	})
+
+	st.Panics(func() {
+		// invalid lang
+		languages["not-exist"] = "not-Exist"
+
+		m := New("testdata", "en", languages)
+		m.LoadMode = MultiFile
+		m.Init()
+	})
 }
 
 func TestI18n_NewLang(t *testing.T) {
@@ -119,6 +162,7 @@ func TestI18n_NewLang(t *testing.T) {
 	st.Equal("Blog", l.Tr("en", "name"))
 	st.Equal("name", l.DefTr("name"))
 
+	// not exist lang
 	err = l.LoadFile("zh-CN", "testdata/zh-CN.ini")
 	st.Error(err)
 	err = l.LoadString("zh-CN", "name = 博客")

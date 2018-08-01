@@ -1,5 +1,5 @@
 /*
-Simple i18n manage, use INI format file
+Package i18n is a simple language manager, use INI format file.
 
 Source code and other details for the project are available at GitHub:
 
@@ -40,7 +40,17 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gookit/ini"
-	"log"
+	"io/ioutil"
+	"os"
+	"strings"
+)
+
+// language file load mode
+const (
+	// language name is file name. "en" -> "lang/en.ini"
+	SingleFile uint8 = 0
+	// language name is dir name, will load all file in the dir. "en" -> "lang/en/*.ini"
+	MultiFile uint8 = 1
 )
 
 // I18n language manager
@@ -52,7 +62,11 @@ type I18n struct {
 	langDir string
 	// language list {en:English, zh-CN:简体中文}
 	languages map[string]string
+	// loaded lang files
+	// loadedFiles []string
 
+	// mode for the load language files. mode: 0 single file, 1 multi files
+	LoadMode uint8
 	// default language name. eg. "en"
 	DefaultLang string
 	// spare(fallback) language name. eg. "en"
@@ -71,17 +85,17 @@ func Instance() *I18n {
 	return defI18n
 }
 
-// Tr
+// Tr translate language key to value string
 func Tr(lang string, key string, args ...interface{}) string {
 	return defI18n.Tr(lang, key, args...)
 }
 
-// DefTr
+// DefTr translate language key from default language
 func DefTr(key string, args ...interface{}) string {
 	return defI18n.DefTr(key, args...)
 }
 
-// Init
+// Init the default language instance
 func Init(langDir string, defLang string, languages map[string]string) *I18n {
 	defI18n.langDir = langDir
 	defI18n.languages = languages
@@ -95,19 +109,19 @@ func Init(langDir string, defLang string, languages map[string]string) *I18n {
  * create instance
  ************************************************************/
 
-// New
+// New a i18n instance
 func New(langDir string, defLang string, languages map[string]string) *I18n {
 	return &I18n{
-		data:    make(map[string]*ini.Ini, 0),
-		langDir: langDir,
+		data: make(map[string]*ini.Ini, 0),
 
+		langDir:   langDir,
 		languages: languages,
 
 		DefaultLang: defLang,
 	}
 }
 
-// NewEmpty
+// NewEmpty a empty i18n instance
 func NewEmpty() *I18n {
 	return &I18n{
 		data: make(map[string]*ini.Ini, 0),
@@ -116,7 +130,7 @@ func NewEmpty() *I18n {
 	}
 }
 
-// NewEmpty
+// NewWithInit a i18n instance and call init
 func NewWithInit(langDir string, defLang string, languages map[string]string) *I18n {
 	m := New(langDir, defLang, languages)
 
@@ -168,7 +182,7 @@ func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 	return val
 }
 
-// HasKey
+// HasKey in the language data
 func (l *I18n) HasKey(lang, key string) (ok bool) {
 	if !l.HasLang(lang) {
 		return
@@ -193,19 +207,59 @@ func (l *I18n) transFromFallback(key string) (val string) {
 
 // Init load add language files
 func (l *I18n) Init() *I18n {
-	for lang := range l.languages {
-		lData, err := ini.LoadFiles(l.langDir + "/" + lang + ".ini")
-		if err != nil {
-			log.Fatalf("Fail to load language: %s, error %s", lang, err.Error())
-		}
-
-		l.data[lang] = lData
+	if l.LoadMode == SingleFile {
+		l.LoadSingleFiles()
+	} else if l.LoadMode == MultiFile {
+		l.LoadMultiFiles()
+	} else {
+		panic("invalid load mode setting. only allow 0, 1")
 	}
 
 	return l
 }
 
-// Add
+// LoadSingleFiles load language file when LoadMode is 0
+func (l *I18n) LoadSingleFiles() {
+	pathSep := string(os.PathSeparator)
+
+	for lang := range l.languages {
+		lData, err := ini.LoadFiles(l.langDir + pathSep + lang + ".ini")
+		if err != nil {
+			panic("fail to load language: " + lang + ", error " + err.Error())
+		}
+
+		l.data[lang] = lData
+	}
+}
+
+// LoadMultiFiles load language file when LoadMode is 1
+func (l *I18n) LoadMultiFiles() {
+	pathSep := string(os.PathSeparator)
+
+	for lang := range l.languages {
+		dirPath := l.langDir + pathSep + lang
+		files, err := ioutil.ReadDir(dirPath)
+		if err != nil {
+			panic("read dir fail: " + dirPath + ", error " + err.Error())
+		}
+
+		for _, fi := range files {
+			// filter the specified format
+			isIni := strings.HasSuffix(fi.Name(), ".ini")
+
+			if isIni && !fi.IsDir() {
+				lData, err := ini.LoadFiles(dirPath + pathSep + fi.Name())
+				if err != nil {
+					panic("fail to load language file: " + lang + ", error " + err.Error())
+				}
+
+				l.data[lang] = lData
+			}
+		}
+	}
+}
+
+// Add new language
 func (l *I18n) Add(lang string, name string) {
 	l.NewLang(lang, name)
 }
@@ -218,7 +272,7 @@ func (l *I18n) NewLang(lang string, name string) {
 	l.languages[lang] = name
 }
 
-// Add new language or append lang data
+// LoadFile append data to a exist language
 // usage:
 // 	i18n.LoadFile("zh-CN", "path/to/zh-CN.ini")
 func (l *I18n) LoadFile(lang string, file string) (err error) {
@@ -273,13 +327,13 @@ func (l *I18n) Export(lang string) string {
 	return buf.String()
 }
 
-// HasLang
+// HasLang in the manager
 func (l *I18n) HasLang(lang string) bool {
 	_, ok := l.languages[lang]
 	return ok
 }
 
-// DelLang
+// DelLang from the i18n manager
 func (l *I18n) DelLang(lang string) bool {
 	_, ok := l.languages[lang]
 	if ok {
@@ -290,7 +344,7 @@ func (l *I18n) DelLang(lang string) bool {
 	return ok
 }
 
-// Languages
+// Languages get all languages
 func (l *I18n) Languages() map[string]string {
 	return l.languages
 }
