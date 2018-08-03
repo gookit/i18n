@@ -61,7 +61,7 @@ func TestI18n(t *testing.T) {
 	m := NewWithInit("testdata", "en", languages)
 	st.True(m.HasLang("zh-CN"))
 	st.False(m.HasLang("zh-TW"))
-	st.Equal(SingleFile, m.LoadMode)
+	st.Equal(FileMode, m.LoadMode)
 
 	str := m.Tr("zh-TW", "key")
 	st.Equal("key", str)
@@ -109,7 +109,7 @@ func TestI18n(t *testing.T) {
 	})
 }
 
-func TestMultiFile(t *testing.T) {
+func TestDirMode(t *testing.T) {
 	st := assert.New(t)
 	languages := map[string]string{
 		"en":    "English",
@@ -119,15 +119,17 @@ func TestMultiFile(t *testing.T) {
 
 	m := New("testdata", "en", languages)
 	// setting
-	m.LoadMode = MultiFile
+	m.LoadMode = DirMode
 	m.Init()
 
 	st.True(m.HasLang("zh-CN"))
 	st.False(m.HasLang("zh-TW"))
-	st.Equal(MultiFile, m.LoadMode)
+	st.Equal(DirMode, m.LoadMode)
 
 	st.Equal("inhere", m.DefTr("name"))
 	st.Equal("语言管理", m.Tr("zh-CN", "use-for"))
+
+	fmt.Println(m.Lang("zh-CN").Data())
 
 	st.Panics(func() {
 		m := New("testdata", "en", languages)
@@ -141,7 +143,7 @@ func TestMultiFile(t *testing.T) {
 		languages["not-exist"] = "not-Exist"
 
 		m := New("testdata", "en", languages)
-		m.LoadMode = MultiFile
+		m.LoadMode = DirMode
 		m.Init()
 	})
 }

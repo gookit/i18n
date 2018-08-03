@@ -48,9 +48,9 @@ import (
 // language file load mode
 const (
 	// language name is file name. "en" -> "lang/en.ini"
-	SingleFile uint8 = 0
+	FileMode uint8 = 0
 	// language name is dir name, will load all file in the dir. "en" -> "lang/en/*.ini"
-	MultiFile uint8 = 1
+	DirMode uint8 = 1
 )
 
 // I18n language manager
@@ -65,7 +65,7 @@ type I18n struct {
 	// loaded lang files
 	// loadedFiles []string
 
-	// mode for the load language files. mode: 0 single file, 1 multi files
+	// mode for the load language files. mode: 0 single file, 1 multi dir
 	LoadMode uint8
 	// default language name. eg. "en"
 	DefaultLang string
@@ -207,10 +207,10 @@ func (l *I18n) transFromFallback(key string) (val string) {
 
 // Init load add language files
 func (l *I18n) Init() *I18n {
-	if l.LoadMode == SingleFile {
-		l.LoadSingleFiles()
-	} else if l.LoadMode == MultiFile {
-		l.LoadMultiFiles()
+	if l.LoadMode == FileMode {
+		l.loadSingleFiles()
+	} else if l.LoadMode == DirMode {
+		l.loadDirFiles()
 	} else {
 		panic("invalid load mode setting. only allow 0, 1")
 	}
@@ -218,8 +218,8 @@ func (l *I18n) Init() *I18n {
 	return l
 }
 
-// LoadSingleFiles load language file when LoadMode is 0
-func (l *I18n) LoadSingleFiles() {
+// load language files when LoadMode is 0
+func (l *I18n) loadSingleFiles() {
 	pathSep := string(os.PathSeparator)
 
 	for lang := range l.languages {
@@ -232,8 +232,8 @@ func (l *I18n) LoadSingleFiles() {
 	}
 }
 
-// LoadMultiFiles load language file when LoadMode is 1
-func (l *I18n) LoadMultiFiles() {
+// load language files when LoadMode is 1
+func (l *I18n) loadDirFiles() {
 	pathSep := string(os.PathSeparator)
 
 	for lang := range l.languages {
@@ -243,17 +243,24 @@ func (l *I18n) LoadMultiFiles() {
 			panic("read dir fail: " + dirPath + ", error " + err.Error())
 		}
 
+		sl := l.data[lang]
+
 		for _, fi := range files {
-			// filter the specified format
-			isIni := strings.HasSuffix(fi.Name(), ".ini")
+			// skip dir and filter the specified format
+			if fi.IsDir() || !strings.HasSuffix(fi.Name(), ".ini") {
+				continue
+			}
 
-			if isIni && !fi.IsDir() {
-				lData, err := ini.LoadFiles(dirPath + pathSep + fi.Name())
-				if err != nil {
-					panic("fail to load language file: " + lang + ", error " + err.Error())
-				}
+			var err error
+			if sl != nil {
+				err = sl.LoadFiles(dirPath + pathSep + fi.Name())
+			} else {
+				sl, err = ini.LoadFiles(dirPath + pathSep + fi.Name())
+				l.data[lang] = sl
+			}
 
-				l.data[lang] = lData
+			if err != nil {
+				panic("fail to load language file: " + lang + ", error " + err.Error())
 			}
 		}
 	}
