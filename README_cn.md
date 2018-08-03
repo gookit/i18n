@@ -55,6 +55,8 @@ conf/
 
     // 从默认语言翻译
     msg = i18n.DefTr("key")
+    // with arguments. 
+    msg = i18n.DefTr("key1", "arg1", "arg2")
 ```
 
 ## 测试

@@ -5,9 +5,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/gookit/i18n/badge.svg?branch=master)](https://coveralls.io/github/gookit/i18n?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gookit/i18n)](https://goreportcard.com/report/github.com/gookit/i18n)
 
-Use `ini` files, simple i18n manager implement.
+Use `INI` files, simple i18n manager implement.
 
-- easy to use，can load multi language, multi files
+- Easy to use，can load multi language, multi files
 - Support set default language, fallback language
 - Support parameter replacement
 
@@ -55,6 +55,8 @@ conf/
 
     // translate from default language
     msg = i18n.DefTr("key")
+    // with arguments. 
+    msg = i18n.DefTr("key1", "arg1", "arg2")
 ```
 
 ## Tests
