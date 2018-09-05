@@ -80,8 +80,8 @@ type I18n struct {
 // default instance
 var defI18n = NewEmpty()
 
-// Instance get default i18n instance
-func Instance() *I18n {
+// Default get default i18n instance
+func Default() *I18n {
 	return defI18n
 }
 
@@ -157,8 +157,7 @@ func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 			return key
 		}
 
-		// if has args
-		if len(args) > 0 {
+		if len(args) > 0 { // if has args
 			val = fmt.Sprintf(val, args...)
 		}
 
@@ -174,8 +173,7 @@ func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 		}
 	}
 
-	// if has args
-	if len(args) > 0 {
+	if len(args) > 0 { // if has args
 		val = fmt.Sprintf(val, args...)
 	}
 

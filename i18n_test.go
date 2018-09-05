@@ -39,7 +39,7 @@ func TestInstance(t *testing.T) {
 
 	Init("testdata", "en", languages)
 
-	m := Instance()
+	m := Default()
 	st.IsType(new(I18n), m)
 
 	st.Equal("Blog", Tr("en", "name"))
