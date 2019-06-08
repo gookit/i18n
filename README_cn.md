@@ -71,4 +71,4 @@ go test -cover
 
 ## License
 
-**MIT**
+**[MIT](LICENSE)**

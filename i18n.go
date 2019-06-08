@@ -24,7 +24,7 @@ init:
 
     i18n.Init("conf/lang", "en", languages)
 
-usage:
+Usage:
 
     // translate from special language
     val := i18n.Tr("en", "key")
@@ -39,10 +39,11 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/gookit/ini"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/gookit/ini"
 )
 
 // language file load mode
@@ -270,7 +271,7 @@ func (l *I18n) Add(lang string, name string) {
 }
 
 // NewLang create/add a new language
-// usage:
+// Usage:
 // 	i18n.NewLang("zh-CN", "简体中文")
 func (l *I18n) NewLang(lang string, name string) {
 	// lang exist
@@ -283,7 +284,7 @@ func (l *I18n) NewLang(lang string, name string) {
 }
 
 // LoadFile append data to a exist language
-// usage:
+// Usage:
 // 	i18n.LoadFile("zh-CN", "path/to/zh-CN.ini")
 func (l *I18n) LoadFile(lang string, file string) (err error) {
 	// append data
@@ -300,7 +301,7 @@ func (l *I18n) LoadFile(lang string, file string) (err error) {
 }
 
 // LoadString load language data form a string
-// usage:
+// Usage:
 // i18n.Set("zh-CN", "name = blog")
 func (l *I18n) LoadString(lang string, data string) (err error) {
 	// append data
@@ -332,7 +333,11 @@ func (l *I18n) Export(lang string) string {
 	}
 
 	var buf bytes.Buffer
-	l.data[lang].WriteTo(&buf)
+
+	_, err := l.data[lang].WriteTo(&buf)
+	if err != nil {
+		panic(err)
+	}
 
 	return buf.String()
 }
