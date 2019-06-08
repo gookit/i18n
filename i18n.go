@@ -43,7 +43,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gookit/ini"
+	"github.com/gookit/ini/v2"
 )
 
 // language file load mode
@@ -165,7 +165,7 @@ func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 		return val
 	}
 
-	val, ok := l.data[lang].Get(key)
+	val, ok := l.data[lang].GetValue(key)
 	if !ok {
 		// find from fallback lang
 		val = l.transFromFallback(key)
@@ -186,7 +186,8 @@ func (l *I18n) HasKey(lang, key string) (ok bool) {
 	if !l.HasLang(lang) {
 		return
 	}
-	_, ok = l.data[lang].Get(key)
+
+	_, ok = l.data[lang].GetValue(key)
 	return
 }
 
@@ -197,7 +198,7 @@ func (l *I18n) transFromFallback(key string) (val string) {
 		return
 	}
 
-	return l.data[fb].MustString(key)
+	return l.data[fb].String(key)
 }
 
 /************************************************************
@@ -222,7 +223,8 @@ func (l *I18n) loadSingleFiles() {
 	pathSep := string(os.PathSeparator)
 
 	for lang := range l.languages {
-		lData, err := ini.LoadFiles(l.langDir + pathSep + lang + ".ini")
+		lData := ini.New()
+		err   := lData.LoadFiles(l.langDir + pathSep + lang + ".ini")
 		if err != nil {
 			panic("fail to load language: " + lang + ", error " + err.Error())
 		}
@@ -253,8 +255,9 @@ func (l *I18n) loadDirFiles() {
 			var err error
 			if sl != nil {
 				err = sl.LoadFiles(dirPath + pathSep + fi.Name())
-			} else {
-				sl, err = ini.LoadFiles(dirPath + pathSep + fi.Name())
+			} else { // create new language instance
+				sl = ini.New()
+				err = sl.LoadFiles(dirPath + pathSep + fi.Name())
 				l.data[lang] = sl
 			}
 

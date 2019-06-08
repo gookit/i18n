@@ -98,7 +98,7 @@ func TestI18n(t *testing.T) {
 
 	l = m.Lang("en")
 	st.NotNil(l)
-	st.Equal("Blog", l.MustString("name"))
+	st.Equal("Blog", l.String("name"))
 
 	ok := m.DelLang("zh-CN")
 	st.True(ok)
