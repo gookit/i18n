@@ -100,7 +100,6 @@ func DefTr(key string, args ...interface{}) string {
 func Init(langDir string, defLang string, languages map[string]string) *I18n {
 	defI18n.langDir = langDir
 	defI18n.languages = languages
-
 	defI18n.DefaultLang = defLang
 
 	return defI18n.Init()
@@ -224,7 +223,7 @@ func (l *I18n) loadSingleFiles() {
 
 	for lang := range l.languages {
 		lData := ini.New()
-		err   := lData.LoadFiles(l.langDir + pathSep + lang + ".ini")
+		err := lData.LoadFiles(l.langDir + pathSep + lang + ".ini")
 		if err != nil {
 			panic("fail to load language: " + lang + ", error " + err.Error())
 		}

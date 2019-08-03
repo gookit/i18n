@@ -1,4 +1,4 @@
-# i18n
+# I18n
 
 [![GoDoc](https://godoc.org/github.com/gookit/i18n?status.svg)](https://godoc.org/github.com/gookit/i18n)
 [![Build Status](https://travis-ci.org/gookit/i18n.svg?branch=master)](https://travis-ci.org/gookit/i18n)
@@ -7,11 +7,13 @@
 
 Use `INI` files, simple i18n manager implement.
 
+> **[中文说明](README.zh-CN.md)**
+
+## Features
+
 - Easy to use，can load multi language, multi files
 - Support set default language, fallback language
 - Support parameter replacement
-
-> **[中文说明](README_cn.md)**
 
 ## Godoc
 
@@ -21,14 +23,16 @@ Use `INI` files, simple i18n manager implement.
 ## Usage
 
 ```text
-conf/
-    lang/
-        en.ini
-        zh-CN.ini
+lang/
+    en/
+        default.ini
+        ...
+    zh-CN/
+        default.ini
         ...
 ```
 
-- init
+### Init
 
 ```go
     import "github/gookit/i18n"
@@ -47,7 +51,7 @@ conf/
     // i18n.NewEmpty()
 ```
 
-- usage
+### Translate
 
 ```go
     // translate from special language
@@ -67,7 +71,7 @@ go test -cover
 
 ## Dep packages
 
-- [gookit/ini](https://github.com/gookit/ini) ini 解析管理
+- [gookit/ini](https://github.com/gookit/ini) is an INI config file/data manage implement
 
 ## License
 

@@ -1,5 +1,7 @@
 language: go
+dist: bionic
 go:
+  - '1.10'
   - '1.11'
   - '1.12'
 
@@ -9,4 +11,4 @@ before_install:
 
 script:
 #  - go test -v -cover
-  - $HOME/gopath/bin/goveralls -service=travis-ci
+  - $HOME/gopath/bin/goveralls -v -service=travis-ci

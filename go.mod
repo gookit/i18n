@@ -1,6 +1,6 @@
 module github.com/gookit/i18n
 
-go 1.12
+go 1.11
 
 require (
 	github.com/gookit/ini/v2 v2.0.2
