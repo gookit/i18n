@@ -18,7 +18,7 @@ func Example() {
 	l := New("testdata", "en", languages)
 	l.Init()
 
-	fmt.Printf("name %s\n", l.Tr("en", "name"))
+	fmt.Printf("name %s\n", l.T("en", "name"))
 	fmt.Printf("name %s\n", l.DefTr("name"))
 	fmt.Printf("name %s\n", l.Tr("zh-CN", "name"))
 	fmt.Printf("use args: %s\n", l.DefTr("argMsg", "inhere"))
@@ -43,10 +43,12 @@ func TestInstance(t *testing.T) {
 	m := Default()
 	st.IsType(new(I18n), m)
 
-	st.Equal("Blog", Tr("en", "name"))
+	st.Equal("Blog", T("en", "name"))
 
 	st.Equal("Blog", Tr("en", "name"))
+	st.Equal("Blog", Dt("name"))
 	st.Equal("Blog", DefTr("name"))
+	st.Equal("博客", T("zh-CN", "name"))
 	st.Equal("博客", Tr("zh-CN", "name"))
 }
 
@@ -127,6 +129,7 @@ func TestDirMode(t *testing.T) {
 	st.False(m.HasLang("zh-TW"))
 	st.Equal(DirMode, m.LoadMode)
 
+	st.Equal("inhere", m.Dt("name"))
 	st.Equal("inhere", m.DefTr("name"))
 	st.Equal("语言管理", m.Tr("zh-CN", "use-for"))
 

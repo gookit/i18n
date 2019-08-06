@@ -86,9 +86,19 @@ func Default() *I18n {
 	return defI18n
 }
 
+// T translate language key to value string
+func T(lang string, key string, args ...interface{}) string {
+	return defI18n.T(lang, key, args...)
+}
+
 // Tr translate language key to value string
 func Tr(lang string, key string, args ...interface{}) string {
 	return defI18n.Tr(lang, key, args...)
+}
+
+// Dt translate language key from default language
+func Dt(key string, args ...interface{}) string {
+	return defI18n.DefTr(key, args...)
 }
 
 // DefTr translate language key from default language
@@ -142,8 +152,18 @@ func NewWithInit(langDir string, defLang string, languages map[string]string) *I
  ************************************************************/
 
 // DefTr translate from default lang
+func (l *I18n) Dt(key string, args ...interface{}) string {
+	return l.Tr(l.DefaultLang, key, args...)
+}
+
+// DefTr translate from default lang
 func (l *I18n) DefTr(key string, args ...interface{}) string {
 	return l.Tr(l.DefaultLang, key, args...)
+}
+
+// T translate from a lang by key
+func (l *I18n) T(lang, key string, args ...interface{}) string {
+	return l.Tr(lang, key, args...)
 }
 
 // Tr translate from a lang by key
@@ -304,7 +324,7 @@ func (l *I18n) LoadFile(lang string, file string) (err error) {
 
 // LoadString load language data form a string
 // Usage:
-// i18n.Set("zh-CN", "name = blog")
+// 	i18n.Set("zh-CN", "name = blog")
 func (l *I18n) LoadString(lang string, data string) (err error) {
 	// append data
 	if ld, ok := l.data[lang]; ok {
