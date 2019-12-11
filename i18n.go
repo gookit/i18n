@@ -66,8 +66,14 @@ type I18n struct {
 	// loaded lang files
 	// loadedFiles []string
 
-	// mode for the load language files. mode: 0 single file, 1 multi dir
+	// mode for the load language files.
+	//  0 single language file
+	//  1 multi language directory
 	LoadMode uint8
+	// TODO translate mode.
+	//  0 sprintf
+	//  1 replace
+	TransMode uint8
 	// default language name. eg. "en"
 	DefaultLang string
 	// spare(fallback) language name. eg. "en"
