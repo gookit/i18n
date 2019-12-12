@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/gookit/i18n.svg?branch=master)](https://travis-ci.org/gookit/i18n)
 [![Coverage Status](https://coveralls.io/repos/github/gookit/i18n/badge.svg?branch=master)](https://coveralls.io/github/gookit/i18n?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gookit/i18n)](https://goreportcard.com/report/github.com/gookit/i18n)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/gookit/i18n)](https://github.com/gookit/i18n)
 
 使用INI文件实现的语言数据管理使用。
 
@@ -11,10 +12,16 @@
 
 ## 功能简介
 
-- 使用简单，可加载多个语言，多个文件
-- 两种模式：单文件、文件夹，默认是文件夹模式
-- 支持设置默认语言，备用语言
-- 支持参数替换
+- 使用简单，支持加载多个语言，多个文件
+- 两种数据加载模式：单文件 `FileMode` 、文件夹 `DirMode`；默认是文件夹模式
+- 支持设置默认语言，备用语言；当在默认语言数据没找到时，自动尝试到备用语言查找
+- 支持参数替换，也有两种模式：`SprintfMode` 通过 `fmt.Sprintf` 替换参数，`ReplaceMode` 则使用 `strings.Replacer` 替换
+
+## 安装
+
+```bash
+go get github.com/gookit/i18n
+```
 
 ## Godoc
 
@@ -62,6 +69,34 @@ lang/
     msg = i18n.DefTr("key")
     // with arguments. 
     msg = i18n.DefTr("key1", "arg1", "arg2")
+```
+
+### 参数替换模式
+
+示例语言数据:
+
+```ini
+# en.ini
+desc = I am {name}, age is {age}
+```
+
+使用 `SprintfMode`(**defaults**) 模式:
+
+```go
+msg := i18n.Tr("en", "desc", "name", "tom", "age", 22)
+// Output: "I am tom, age is 22"
+```
+
+使用 `ReplaceMode` 替换模式:
+
+```go
+i18n.TransMode = i18n.ReplaceMode
+
+msg := i18n.Tr("en", "desc", "desc", map[string]interface{}{
+    "name": "tom",
+    "age": 22,
+})
+// Output: "I am tom, age is 22"
 ```
 
 ## 测试

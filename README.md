@@ -4,6 +4,7 @@
 [![Build Status](https://travis-ci.org/gookit/i18n.svg?branch=master)](https://travis-ci.org/gookit/i18n)
 [![Coverage Status](https://coveralls.io/repos/github/gookit/i18n/badge.svg?branch=master)](https://coveralls.io/github/gookit/i18n?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gookit/i18n)](https://goreportcard.com/report/github.com/gookit/i18n)
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/gookit/i18n)](https://github.com/gookit/i18n)
 
 Use `INI` files, simple i18n manager implement.
 
@@ -11,9 +12,16 @@ Use `INI` files, simple i18n manager implement.
 
 ## Features
 
-- Easy to use，can load multi language, multi files
-- Support set default language, fallback language
-- Support parameter replacement
+- Easy to use, supports loading multiple languages, multiple files
+- Two data loading modes: single file `FileMode`, folder` DirMode`; default is folder mode
+- Support to set the default language and fallback language; when the default language data is not found, it will automatically try to find the fallback language
+- Support parameter replacement, there are two modes: `SprintfMode` replaces parameters via` fmt.Sprintf`, `ReplaceMode` uses` strings.Replacer`
+
+## Install
+
+```bash
+go get github.com/gookit/i18n
+```
 
 ## Godoc
 
@@ -32,7 +40,7 @@ lang/
         ...
 ```
 
-### Init
+### Init i18n
 
 ```go
     import "github/gookit/i18n"
@@ -61,6 +69,34 @@ lang/
     msg = i18n.DefTr("key")
     // with arguments. 
     msg = i18n.DefTr("key1", "arg1", "arg2")
+```
+
+### Parameter replacement mode
+
+Example language content:
+
+```ini
+# en.ini
+desc = I am {name}, age is {age}
+```
+
+Use `SprintfMode`(**defaults**):
+
+```go
+msg := i18n.Tr("en", "desc", "name", "tom", "age", 22)
+// Output: "I am tom, age is 22"
+```
+
+Use `ReplaceMode`:
+
+```go
+i18n.TransMode = i18n.ReplaceMode
+
+msg := i18n.Tr("en", "desc", "desc", map[string]interface{}{
+    "name": "tom",
+    "age": 22,
+})
+// Output: "I am tom, age is 22"
 ```
 
 ## Tests

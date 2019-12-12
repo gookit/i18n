@@ -152,6 +152,27 @@ func TestDirMode(t *testing.T) {
 	})
 }
 
+func TestI18n_TransMode(t *testing.T) {
+	is := assert.New(t)
+
+	m := NewEmpty()
+	m.TransMode = ReplaceMode
+	m.Add("en", "English")
+
+	err := m.LoadString("en", "desc = i am {name}, age is {age}")
+	is.NoError(err)
+
+	is.Equal("i am tom, age is 22", m.Tr("en", "desc", "name", "tom", "age", 22))
+	is.Equal("i am tom, age is 22", m.Tr("en", "desc", map[string]interface{}{
+		"name": "tom",
+		"age": 22,
+	}))
+	is.Equal(
+		"i am tom, age is CANNOT-TO-STRING",
+		m.Tr("en", "desc", map[string]interface{}{"name": "tom", "age": []int{2}}),
+	)
+}
+
 func TestI18n_NewLang(t *testing.T) {
 	is := assert.New(t)
 
@@ -183,7 +204,6 @@ func TestI18n_NewLang(t *testing.T) {
 
 	// set default lang
 	l.DefaultLang = "en"
-
 	is.Equal("Blog", l.DefTr("name"))
 }
 
@@ -212,22 +232,4 @@ func TestI18n_LoadString(t *testing.T) {
 	err := m.LoadString("en", "name = Blog")
 	is.Nil(err)
 	is.Equal("Blog", m.Tr("en", "name"))
-}
-
-func TestI18n_TransMode(t *testing.T) {
-	is := assert.New(t)
-
-	m := NewEmpty()
-	m.TransMode = ReplaceRender
-	m.Add("en", "English")
-
-	err := m.LoadString("en", "desc = i an {name}, age is {age}")
-	is.NoError(err)
-
-	is.Equal("i an tom, age is 22", m.Tr("en", "desc", "name", "tom", "age", 22))
-	is.Equal("i an tom, age is 22", m.Tr("en", "desc", map[string]interface{}{"name": "tom", "age": 22}))
-	is.Equal(
-		"i an tom, age is CANNOT-TO-STRING",
-		m.Tr("en", "desc", map[string]interface{}{"name": "tom", "age": []int{2}}),
-	)
 }

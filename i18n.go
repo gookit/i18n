@@ -48,17 +48,19 @@ import (
 )
 
 const (
-	// LoadMode language file load mode
-	// 0 - language name is file name. "en" -> "lang/en.ini"
-	// 1 - language name is dir name, will load all file in the dir. "en" -> "lang/en/*.ini"
+	// I18n.LoadMode language file load mode
+
+	// FileMode language name is file name. "en" -> "lang/en.ini"
 	FileMode uint8 = 0
+	// DirMode language name is dir name, will load all file in the dir. "en" -> "lang/en/*.ini"
 	DirMode uint8 = 1
 
-	// TransMode translate message mode.
-	//	0 sprintf. render message arguments by fmt.Sprintf
-	//  1 replace. render message arguments by string replace
-	SprintfRender uint8 = 0
-	ReplaceRender uint8 = 1
+	// I18n.TransMode translate message mode.
+
+	// SprintfMode render message arguments by fmt.Sprintf
+	SprintfMode uint8 = 0
+	// ReplaceMode render message arguments by string replace
+	ReplaceMode uint8 = 1
 )
 
 // I18n language manager
@@ -134,23 +136,23 @@ func Init(langDir string, defLang string, languages map[string]string) *I18n {
  * create instance
  ************************************************************/
 
-// New a i18n instance
+// New an i18n instance
 func New(langDir string, defLang string, languages map[string]string) *I18n {
 	return &I18n{
 		data: make(map[string]*ini.Ini, 0),
-
+		// language data config
 		langDir:   langDir,
 		languages: languages,
-
+		// set default lang
 		DefaultLang: defLang,
 	}
 }
 
-// NewEmpty a empty i18n instance
+// NewEmpty nwe an empty i18n instance
 func NewEmpty() *I18n {
 	return &I18n{
 		data: make(map[string]*ini.Ini, 0),
-
+		// init languages
 		languages: make(map[string]string, 0),
 	}
 }
@@ -166,7 +168,7 @@ func NewWithInit(langDir string, defLang string, languages map[string]string) *I
  * translate message
  ************************************************************/
 
-// DefTr translate from default lang
+// Dt translate from default lang
 func (l *I18n) Dt(key string, args ...interface{}) string {
 	return l.Tr(l.DefaultLang, key, args...)
 }
@@ -187,31 +189,33 @@ func (l *I18n) T(lang, key string, args ...interface{}) string {
 func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 	if !l.HasLang(lang) {
 		// find from fallback lang
-		val := l.transFromFallback(key)
+		msg := l.transFromFallback(key)
 
-		// if has args
-		if val != "" && len(args) > 0 {
-			val = l.renderMessage(val, args...)
+		// if has args for the message
+		if msg != "" && len(args) > 0 {
+			msg = l.renderMessage(msg, args...)
 		}
-		return val
+		return msg
 	}
 
 	// find message by key
-	val, ok := l.data[lang].GetValue(key)
+	msg, ok := l.data[lang].GetValue(key)
 
 	// key not exists, find from fallback lang
 	if !ok {
-		val = l.transFromFallback(key)
-		if val == "" {
-			return key
-		}
+		msg = l.transFromFallback(key)
 	}
 
-	// if has args
-	if len(args) > 0 {
-		val = l.renderMessage(val, args...)
+	// message is empty
+	if msg == "" {
+		return key
 	}
-	return val
+
+	// if has args for the message
+	if len(args) > 0 {
+		msg = l.renderMessage(msg, args...)
+	}
+	return msg
 }
 
 // HasKey in the language data
@@ -235,7 +239,7 @@ func (l *I18n) transFromFallback(key string) string {
 }
 
 func (l *I18n) renderMessage(msg string, args ...interface{}) string {
-	if l.TransMode == SprintfRender  {
+	if l.TransMode == SprintfMode {
 		return fmt.Sprintf(msg, args...)
 	}
 
