@@ -73,14 +73,14 @@ lang/
 
 ### Parameter replacement mode
 
-Example language content:
+Use `SprintfMode`(**defaults**):
 
 ```ini
 # en.ini
-desc = I am {name}, age is {age}
+desc = I am %s, age is %d
 ```
 
-Use `SprintfMode`(**defaults**):
+Usage with parameters:
 
 ```go
 msg := i18n.Tr("en", "desc", "name", "tom", "age", 22)
@@ -88,6 +88,13 @@ msg := i18n.Tr("en", "desc", "name", "tom", "age", 22)
 ```
 
 Use `ReplaceMode`:
+
+```ini
+# en.ini
+desc = I am {name}, age is {age}
+```
+
+Usage with `map[string]interface{}` params:
 
 ```go
 i18n.TransMode = i18n.ReplaceMode

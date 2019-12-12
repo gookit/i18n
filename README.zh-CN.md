@@ -73,14 +73,14 @@ lang/
 
 ### 参数替换模式
 
-示例语言数据:
+使用 `SprintfMode`(**defaults**) 模式:
 
 ```ini
 # en.ini
-desc = I am {name}, age is {age}
+desc = I am %s, age is %d
 ```
 
-使用 `SprintfMode`(**defaults**) 模式:
+按kv顺序传入参数使用：
 
 ```go
 msg := i18n.Tr("en", "desc", "name", "tom", "age", 22)
@@ -88,6 +88,13 @@ msg := i18n.Tr("en", "desc", "name", "tom", "age", 22)
 ```
 
 使用 `ReplaceMode` 替换模式:
+
+```ini
+# en.ini
+desc = I am {name}, age is {age}
+```
+
+传入 `map[string]interface{}` 参数使用：
 
 ```go
 i18n.TransMode = i18n.ReplaceMode
