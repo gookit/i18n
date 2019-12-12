@@ -190,9 +190,12 @@ func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 	if !l.HasLang(lang) {
 		// find from fallback lang
 		msg := l.transFromFallback(key)
+		if msg == "" {
+			return key
+		}
 
 		// if has args for the message
-		if msg != "" && len(args) > 0 {
+		if len(args) > 0 {
 			msg = l.renderMessage(msg, args...)
 		}
 		return msg
@@ -200,9 +203,8 @@ func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 
 	// find message by key
 	msg, ok := l.data[lang].GetValue(key)
-
-	// key not exists, find from fallback lang
 	if !ok {
+		// key not exists, find from fallback lang
 		msg = l.transFromFallback(key)
 	}
 
