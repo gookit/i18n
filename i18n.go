@@ -41,17 +41,24 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/gookit/ini/v2"
 )
 
-// language file load mode
 const (
-	// language name is file name. "en" -> "lang/en.ini"
+	// LoadMode language file load mode
+	// 0 - language name is file name. "en" -> "lang/en.ini"
+	// 1 - language name is dir name, will load all file in the dir. "en" -> "lang/en/*.ini"
 	FileMode uint8 = 0
-	// language name is dir name, will load all file in the dir. "en" -> "lang/en/*.ini"
 	DirMode uint8 = 1
+
+	// TransMode translate message mode.
+	//	0 sprintf. render message arguments by fmt.Sprintf
+	//  1 replace. render message arguments by string replace
+	SprintfRender uint8 = 0
+	ReplaceRender uint8 = 1
 )
 
 // I18n language manager
@@ -65,6 +72,8 @@ type I18n struct {
 	languages map[string]string
 	// loaded lang files
 	// loadedFiles []string
+
+	// ------------ config for i18n ------------
 
 	// mode for the load language files.
 	//  0 single language file
@@ -154,7 +163,7 @@ func NewWithInit(langDir string, defLang string, languages map[string]string) *I
 }
 
 /************************************************************
- * translate
+ * translate message
  ************************************************************/
 
 // DefTr translate from default lang
@@ -179,30 +188,29 @@ func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 	if !l.HasLang(lang) {
 		// find from fallback lang
 		val := l.transFromFallback(key)
-		if val == "" {
-			return key
-		}
 
-		if len(args) > 0 { // if has args
-			val = fmt.Sprintf(val, args...)
+		// if has args
+		if val != "" && len(args) > 0 {
+			val = l.renderMessage(val, args...)
 		}
-
 		return val
 	}
 
+	// find message by key
 	val, ok := l.data[lang].GetValue(key)
+
+	// key not exists, find from fallback lang
 	if !ok {
-		// find from fallback lang
 		val = l.transFromFallback(key)
 		if val == "" {
 			return key
 		}
 	}
 
-	if len(args) > 0 { // if has args
-		val = fmt.Sprintf(val, args...)
+	// if has args
+	if len(args) > 0 {
+		val = l.renderMessage(val, args...)
 	}
-
 	return val
 }
 
@@ -217,13 +225,83 @@ func (l *I18n) HasKey(lang, key string) (ok bool) {
 }
 
 // translate from fallback language
-func (l *I18n) transFromFallback(key string) (val string) {
-	fb := l.FallbackLang
-	if !l.HasLang(fb) {
-		return
+func (l *I18n) transFromFallback(key string) string {
+	fl := l.FallbackLang
+	if !l.HasLang(fl) {
+		return ""
 	}
 
-	return l.data[fb].String(key)
+	return l.data[fl].String(key)
+}
+
+func (l *I18n) renderMessage(msg string, args ...interface{}) string {
+	if l.TransMode == SprintfRender  {
+		return fmt.Sprintf(msg, args...)
+	}
+
+	// if args[0] is []string
+	if ss, ok := args[0].([]string); ok {
+		return strings.NewReplacer(ss...).Replace(msg)
+	}
+
+	var ss []string
+
+	// if args is map[string]interface{}
+	if mp, ok := args[0].(map[string]interface{}); ok {
+		for k, v := range mp {
+			ss = append(ss, "{" + k + "}")
+			ss = append(ss, toString(v))
+		}
+	} else {
+		// if args is: {field1, value1, field2, value2, ...}, try convert all element to string.
+		for i, val := range args {
+			str := toString(val)
+			if i%2 == 0 {
+				str = "{" + str + "}"
+			}
+
+			ss = append(ss, str)
+		}
+	}
+
+	return strings.NewReplacer(ss...).Replace(msg)
+}
+
+// convert value to string
+func toString(val interface{}) (str string) {
+	switch tVal := val.(type) {
+	case int:
+		str = strconv.Itoa(tVal)
+	case int8:
+		str = strconv.Itoa(int(tVal))
+	case int16:
+		str = strconv.Itoa(int(tVal))
+	case int32:
+		str = strconv.Itoa(int(tVal))
+	case int64:
+		str = strconv.Itoa(int(tVal))
+	case uint:
+		str = strconv.Itoa(int(tVal))
+	case uint8:
+		str = strconv.Itoa(int(tVal))
+	case uint16:
+		str = strconv.Itoa(int(tVal))
+	case uint32:
+		str = strconv.Itoa(int(tVal))
+	case uint64:
+		str = strconv.Itoa(int(tVal))
+	case float32:
+		str = fmt.Sprint(tVal)
+	case float64:
+		str = fmt.Sprint(tVal)
+	case string:
+		str = tVal
+	case nil:
+		str = ""
+	default:
+		str = "CANNOT-TO-STRING"
+	}
+	return
 }
 
 /************************************************************
