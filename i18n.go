@@ -255,7 +255,7 @@ func (l *I18n) renderMessage(msg string, args ...interface{}) string {
 	// if args is map[string]interface{}
 	if mp, ok := args[0].(map[string]interface{}); ok {
 		for k, v := range mp {
-			ss = append(ss, "{" + k + "}")
+			ss = append(ss, "{"+k+"}")
 			ss = append(ss, toString(v))
 		}
 	} else {

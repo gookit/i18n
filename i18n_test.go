@@ -165,7 +165,7 @@ func TestI18n_TransMode(t *testing.T) {
 	is.Equal("i am tom, age is 22", m.Tr("en", "desc", "name", "tom", "age", 22))
 	is.Equal("i am tom, age is 22", m.Tr("en", "desc", map[string]interface{}{
 		"name": "tom",
-		"age": 22,
+		"age":  22,
 	}))
 	is.Equal(
 		"i am tom, age is CANNOT-TO-STRING",
