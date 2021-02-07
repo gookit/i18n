@@ -1,10 +1,11 @@
 # I18n
 
-[![GoDoc](https://godoc.org/github.com/gookit/i18n?status.svg)](https://godoc.org/github.com/gookit/i18n)
-[![Build Status](https://travis-ci.org/gookit/i18n.svg?branch=master)](https://travis-ci.org/gookit/i18n)
+[![GoDoc](https://godoc.org/github.com/gookit/i18n?status.svg)](https://pkg.go.dev/github.com/gookit/i18n)
+[![Actions Status](https://github.com/gookit/i18n/workflows/Unit-Tests/badge.svg)](https://github.com/gookit/i18n/actions)
 [![Coverage Status](https://coveralls.io/repos/github/gookit/i18n/badge.svg?branch=master)](https://coveralls.io/github/gookit/i18n?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gookit/i18n)](https://goreportcard.com/report/github.com/gookit/i18n)
 [![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/gookit/i18n)](https://github.com/gookit/i18n)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/gookit/i18n?style=flat-square)
 
 使用INI文件实现的语言数据管理使用。
 
@@ -25,8 +26,8 @@ go get github.com/gookit/i18n
 
 ## Godoc
 
-- [godoc for gopkg](https://godoc.org/gopkg.in/gookit/i18n.v1)
-- [godoc for github](https://godoc.org/github.com/gookit/i18n)
+- [godoc for gopkg](https://pkg.go.dev/gopkg.in/gookit/i18n.v1)
+- [godoc for github](https://pkg.go.dev/github.com/gookit/i18n)
 
 ## 快速使用
 
@@ -73,11 +74,25 @@ lang/
 
 ### 参数替换模式
 
-使用 `SprintfMode`(**defaults**) 模式:
+**使用 `SprintfMode`(defaults) 模式:**
 
 ```ini
 # en.ini
 desc = I am %s, age is %d
+```
+
+按顺序传入参数使用：
+
+```go
+msg := i18n.Tr("en", "desc", "tom", 22)
+// Output: "I am tom, age is 22"
+```
+
+**使用 `ReplaceMode` 替换模式:**
+
+```ini
+# en.ini
+desc = I am {name}, age is {age}
 ```
 
 按kv顺序传入参数使用：
@@ -85,13 +100,6 @@ desc = I am %s, age is %d
 ```go
 msg := i18n.Tr("en", "desc", "name", "tom", "age", 22)
 // Output: "I am tom, age is 22"
-```
-
-使用 `ReplaceMode` 替换模式:
-
-```ini
-# en.ini
-desc = I am {name}, age is {age}
 ```
 
 传入 `map[string]interface{}` 参数使用：

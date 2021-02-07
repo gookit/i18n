@@ -81,7 +81,7 @@ type I18n struct {
 	//  0 single language file
 	//  1 multi language directory
 	LoadMode uint8
-	// TODO translate mode.
+	// translate mode.
 	//  0 sprintf
 	//  1 replace
 	TransMode uint8
