@@ -4,5 +4,5 @@ go 1.13
 
 require (
 	github.com/gookit/ini/v2 v2.1.1
-	github.com/stretchr/testify v1.7.2
+	github.com/stretchr/testify v1.7.4
 )
