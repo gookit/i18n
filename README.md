@@ -7,14 +7,14 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/gookit/i18n?style=flat-square)
 [![Go Reference](https://pkg.go.dev/badge/github.com/gookit/i18n.svg)](https://pkg.go.dev/github.com/gookit/i18n)
 
-Use `INI` files, simple i18n manager implement.
+Management and use of multilingual data using `INI` files.
 
 > **[中文说明](README.zh-CN.md)**
 
 ## Features
 
 - Easy to use, supports loading multiple languages, multiple files
-- Two data loading modes: single file `FileMode`, folder `DirMode`(default)
+- Two data loading modes: single file `FileMode`(default), folder `DirMode`
 - Support to set the default language and fallback language
   - when the default language data is not found, it will automatically try to find the fallback language
 - Support parameter replacement, there are two modes
@@ -33,14 +33,30 @@ go get github.com/gookit/i18n
 
 ## Usage
 
+**Structs on use single `FileMode` mode**:
+
+```text
+lang/
+    en.ini
+    ru.ini
+    zh-CN.ini
+    zh-TW.ini
+    ... ...
+```
+
+**Structs on use folder `DirMode` mode**:
+
 ```text
 lang/
     en/
         default.ini
-        ...
+        ... ...
     zh-CN/
         default.ini
-        ...
+        ... ...
+    zh-TW/
+        default.ini
+        ... ...
 ```
 
 ### Init i18n
@@ -62,16 +78,29 @@ i18n.Init("conf/lang", "en", languages)
 // i18n.NewEmpty()
 ```
 
-### Translate
+### Translate message
 
 ```go
-// translate from special language
-msg := i18n.Tr("en", "key")
-
-// translate from default language
+// Translate from default language
 msg = i18n.Dt("key")
 // with arguments. 
 msg = i18n.DefTr("key1", "arg1", "arg2")
+
+// Translate from the specified language
+msg := i18n.Tr("en", "key")
+```
+
+**Function list**:
+
+```go
+// Translate from default language
+func Dt(key string, args ...interface{}) string
+func Dtr(key string, args ...interface{}) string
+func DefTr(key string, args ...interface{}) string
+
+// Translate from the specified language
+func T(lang, key string, args ...interface{}) string
+func Tr(lang, key string, args ...interface{}) string
 ```
 
 ## Parameters replacement mode
@@ -92,27 +121,39 @@ msg := i18n.Tr("en", "desc", "tom", 22)
 // Output: "I am tom, age is 22"
 ```
 
-### Use Replace Mode
+### Use replace mode
+
+Enable replace mode:
+
+```go
+// set mode
+i18n.Std().TransMode = i18n.ReplaceMode
+
+// OR
+i18n.Config(func(l *i18n.I18n) {
+    l.TransMode = i18n.ReplaceMode
+})
+```
+
+Examples for language data:
 
 ```ini
 # en.ini
 desc = I am {name}, age is {age}
 ```
 
-Usage with parameters:
+**Usage with parameters**:
 
 ```go
-// "name": "tom", "age": 22
+// args is {"name": "tom", "age": 22}
 msg := i18n.Tr("en", "desc", "name", "tom", "age", 22)
 // Output: "I am tom, age is 22"
 ```
 
-Usage with `map[string]interface{}` params:
+**Usage with kv-map parameters**:
 
 ```go
-i18n.TransMode = i18n.ReplaceMode
-
-msg := i18n.Tr("en", "desc", "desc", map[string]interface{}{
+msg := i18n.Tr("en", "desc", map[string]interface{}{
     "name": "tom",
     "age": 22,
 })

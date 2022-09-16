@@ -5,30 +5,40 @@ Source code and other details for the project are available at GitHub:
 
 	https://github.com/gookit/i18n
 
-lang files:
+Language files:
 
-	conf/
-	    lang/
-	        en.ini
-	        zh-CN.ini
+	// structs on mode is FileMode(default)
+	lang/
+		en.ini
+		zh-CN.ini
 
-init:
+	// structs on mode is DirMode
+	lang/
+		en/
+			default.ini
+			other.ini
+		zh-CN/
+			default.ini
+			other.ini
 
+Load:
+
+	defaultLang = "en"
 	languages := map[string]string{
 	    "en": "English",
 	    "zh-CN": "简体中文",
 	    "zh-TW": "繁体中文",
 	}
 
-	i18n.Init("conf/lang", "en", languages)
+	i18n.Init("conf/lang", defaultLang, languages)
 
 Usage:
 
+	// translate from default language
+	val := i18n.Dtr("key")
+
 	// translate from special language
 	val := i18n.Tr("en", "key")
-
-	// translate from default language
-	val := i18n.DefTr("key")
 */
 package i18n
 
