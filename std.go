@@ -18,6 +18,20 @@ func Default() *I18n { return std }
 // Reset std instance
 func Reset() { std = NewEmpty() }
 
+// Init the default language instance
+func Init(langDir, defLang string, languages map[string]string) *I18n {
+	std.langDir = langDir
+	std.languages = languages
+	std.DefaultLang = defLang
+
+	return std.Init()
+}
+
+// Config the default instance
+func Config(fn func(l *I18n)) {
+	fn(std)
+}
+
 // T translate language key to value string
 func T(lang, key string, args ...interface{}) string {
 	return std.T(lang, key, args...)
@@ -33,18 +47,14 @@ func Dt(key string, args ...interface{}) string {
 	return std.DefTr(key, args...)
 }
 
-// DefTr translate language key from default language
-func DefTr(key string, args ...interface{}) string {
+// Dtr translate language key from default language
+func Dtr(key string, args ...interface{}) string {
 	return std.DefTr(key, args...)
 }
 
-// Init the default language instance
-func Init(langDir, defLang string, languages map[string]string) *I18n {
-	std.langDir = langDir
-	std.languages = languages
-	std.DefaultLang = defLang
-
-	return std.Init()
+// DefTr translate language key from default language
+func DefTr(key string, args ...interface{}) string {
+	return std.DefTr(key, args...)
 }
 
 // AddLang register and init new language. alias of NewLang()

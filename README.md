@@ -14,9 +14,12 @@ Use `INI` files, simple i18n manager implement.
 ## Features
 
 - Easy to use, supports loading multiple languages, multiple files
-- Two data loading modes: single file `FileMode`, folder` DirMode`; default is folder mode
-- Support to set the default language and fallback language; when the default language data is not found, it will automatically try to find the fallback language
-- Support parameter replacement, there are two modes: `SprintfMode` replaces parameters via` fmt.Sprintf`, `ReplaceMode` uses` strings.Replacer`
+- Two data loading modes: single file `FileMode`, folder `DirMode`(default)
+- Support to set the default language and fallback language
+  - when the default language data is not found, it will automatically try to find the fallback language
+- Support parameter replacement, there are two modes
+  - `SprintfMode` replaces parameters via `fmt.Sprintf`
+  - `ReplaceMode` uses func `strings.Replacer`
 
 ## Install
 
@@ -71,9 +74,11 @@ msg = i18n.Dt("key")
 msg = i18n.DefTr("key1", "arg1", "arg2")
 ```
 
-### Parameters replacement mode
+## Parameters replacement mode
 
-**Use `SprintfMode`(defaults):**
+### Use sprintf mode
+
+> TIP: default mode is `SprintfMode`
 
 ```ini
 # en.ini
@@ -87,7 +92,7 @@ msg := i18n.Tr("en", "desc", "tom", 22)
 // Output: "I am tom, age is 22"
 ```
 
-**Use `ReplaceMode`:**
+### Use Replace Mode
 
 ```ini
 # en.ini

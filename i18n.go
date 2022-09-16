@@ -14,8 +14,6 @@ lang files:
 
 init:
 
-	import "github/gookit/i18n"
-
 	languages := map[string]string{
 	    "en": "English",
 	    "zh-CN": "简体中文",
@@ -121,6 +119,11 @@ func NewWithInit(langDir, defLang string, languages map[string]string) *I18n {
 	return New(langDir, defLang, languages).Init()
 }
 
+// Config the manager instance
+func (l *I18n) Config(fn func(l *I18n)) {
+	fn(l)
+}
+
 // Init load add language files
 func (l *I18n) Init() *I18n {
 	if l.LoadMode == FileMode {
@@ -140,6 +143,11 @@ func (l *I18n) Init() *I18n {
 
 // Dt translate from default lang
 func (l *I18n) Dt(key string, args ...interface{}) string {
+	return l.Tr(l.DefaultLang, key, args...)
+}
+
+// Dtr translate from default lang
+func (l *I18n) Dtr(key string, args ...interface{}) string {
 	return l.Tr(l.DefaultLang, key, args...)
 }
 
@@ -411,7 +419,6 @@ func (l *I18n) Lang(lang string) *ini.Ini {
 	if _, ok := l.languages[lang]; ok {
 		return l.data[lang]
 	}
-
 	return nil
 }
 

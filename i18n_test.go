@@ -31,29 +31,7 @@ func Example() {
 	// use args: hello inhere, welcome
 }
 
-func TestInstance(t *testing.T) {
-	is := assert.New(t)
-	languages := map[string]string{
-		"en":    "English",
-		"zh-CN": "简体中文",
-		// "zh-TW": "繁体中文",
-	}
-
-	Init("testdata", "en", languages)
-
-	m := Default()
-	is.IsType(new(I18n), m)
-
-	is.Eq("Blog", T("en", "name"))
-
-	is.Eq("Blog", Tr("en", "name"))
-	is.Eq("Blog", Dt("name"))
-	is.Eq("Blog", DefTr("name"))
-	is.Eq("博客", T("zh-CN", "name"))
-	is.Eq("博客", Tr("zh-CN", "name"))
-}
-
-func TestI18n(t *testing.T) {
+func TestNewWithInit(t *testing.T) {
 	is := assert.New(t)
 
 	languages := map[string]string{
@@ -178,7 +156,7 @@ func TestI18n_NewLang(t *testing.T) {
 	is := assert.New(t)
 
 	l := NewEmpty()
-	l.Add("en", "English")
+	l.AddLang("en", "English")
 
 	err := l.LoadFile("en", "testdata/en.ini")
 	is.Nil(err)
@@ -204,8 +182,10 @@ func TestI18n_NewLang(t *testing.T) {
 	is.Nil(err)
 
 	// set default lang
-	l.DefaultLang = "en"
-	is.Eq("Blog", l.DefTr("name"))
+	l.Config(func(l *I18n) {
+		l.DefaultLang = "en"
+	})
+	is.Eq("Blog", l.Dtr("name"))
 }
 
 func TestI18n_Export(t *testing.T) {
