@@ -3,7 +3,7 @@ Package i18n is a simple language manager, use INI format file.
 
 Source code and other details for the project are available at GitHub:
 
-   https://github.com/gookit/i18n
+	https://github.com/gookit/i18n
 
 lang files:
 
@@ -14,24 +14,23 @@ lang files:
 
 init:
 
-    import "github/gookit/i18n"
+	import "github/gookit/i18n"
 
-    languages := map[string]string{
-        "en": "English",
-        "zh-CN": "简体中文",
-        "zh-TW": "繁体中文",
-    }
+	languages := map[string]string{
+	    "en": "English",
+	    "zh-CN": "简体中文",
+	    "zh-TW": "繁体中文",
+	}
 
-    i18n.Init("conf/lang", "en", languages)
+	i18n.Init("conf/lang", "en", languages)
 
 Usage:
 
-    // translate from special language
-    val := i18n.Tr("en", "key")
+	// translate from special language
+	val := i18n.Tr("en", "key")
 
-    // translate from default language
-    val := i18n.DefTr("key")
-
+	// translate from default language
+	val := i18n.DefTr("key")
 */
 package i18n
 
@@ -41,21 +40,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 
+	"github.com/gookit/goutil/errorx"
+	"github.com/gookit/goutil/strutil"
 	"github.com/gookit/ini/v2"
 )
 
 const (
-	// I18n.LoadMode language file load mode
+	// ---- I18n.LoadMode language file load mode
 
 	// FileMode language name is file name. "en" -> "lang/en.ini"
 	FileMode uint8 = 0
 	// DirMode language name is dir name, will load all file in the dir. "en" -> "lang/en/*.ini"
 	DirMode uint8 = 1
 
-	// I18n.TransMode translate message mode.
+	// ---- I18n.TransMode translate message mode.
 
 	// SprintfMode render message arguments by fmt.Sprintf
 	SprintfMode uint8 = 0
@@ -77,59 +77,18 @@ type I18n struct {
 
 	// ------------ config for i18n ------------
 
-	// mode for the load language files.
+	// LoadMode mode for the load language files.
 	//  0 single language file
-	//  1 multi language directory
+	//  1 multi-language directory
 	LoadMode uint8
-	// translate mode.
+	// TransMode translate mode.
 	//  0 sprintf
 	//  1 replace
 	TransMode uint8
-	// default language name. eg. "en"
+	// DefaultLang default language name. eg. "en"
 	DefaultLang string
-	// spare(fallback) language name. eg. "en"
+	// FallbackLang spare(fallback) language name. eg. "en"
 	FallbackLang string
-}
-
-/************************************************************
- * default instance
- ************************************************************/
-
-// default instance
-var defI18n = NewEmpty()
-
-// Default get default i18n instance
-func Default() *I18n {
-	return defI18n
-}
-
-// T translate language key to value string
-func T(lang string, key string, args ...interface{}) string {
-	return defI18n.T(lang, key, args...)
-}
-
-// Tr translate language key to value string
-func Tr(lang string, key string, args ...interface{}) string {
-	return defI18n.Tr(lang, key, args...)
-}
-
-// Dt translate language key from default language
-func Dt(key string, args ...interface{}) string {
-	return defI18n.DefTr(key, args...)
-}
-
-// DefTr translate language key from default language
-func DefTr(key string, args ...interface{}) string {
-	return defI18n.DefTr(key, args...)
-}
-
-// Init the default language instance
-func Init(langDir string, defLang string, languages map[string]string) *I18n {
-	defI18n.langDir = langDir
-	defI18n.languages = languages
-	defI18n.DefaultLang = defLang
-
-	return defI18n.Init()
 }
 
 /************************************************************
@@ -137,7 +96,7 @@ func Init(langDir string, defLang string, languages map[string]string) *I18n {
  ************************************************************/
 
 // New an i18n instance
-func New(langDir string, defLang string, languages map[string]string) *I18n {
+func New(langDir, defLang string, languages map[string]string) *I18n {
 	return &I18n{
 		data: make(map[string]*ini.Ini, 0),
 		// language data config
@@ -148,7 +107,7 @@ func New(langDir string, defLang string, languages map[string]string) *I18n {
 	}
 }
 
-// NewEmpty nwe an empty i18n instance
+// NewEmpty new an empty i18n instance
 func NewEmpty() *I18n {
 	return &I18n{
 		data: make(map[string]*ini.Ini, 0),
@@ -157,11 +116,22 @@ func NewEmpty() *I18n {
 	}
 }
 
-// NewWithInit a i18n instance and call init
-func NewWithInit(langDir string, defLang string, languages map[string]string) *I18n {
-	m := New(langDir, defLang, languages)
+// NewWithInit an i18n instance and call init
+func NewWithInit(langDir, defLang string, languages map[string]string) *I18n {
+	return New(langDir, defLang, languages).Init()
+}
 
-	return m.Init()
+// Init load add language files
+func (l *I18n) Init() *I18n {
+	if l.LoadMode == FileMode {
+		l.loadSingleFiles()
+	} else if l.LoadMode == DirMode {
+		l.loadDirFiles()
+	} else {
+		panic("invalid load mode setting. only allow 0, 1")
+	}
+
+	return l
 }
 
 /************************************************************
@@ -184,8 +154,15 @@ func (l *I18n) T(lang, key string, args ...interface{}) string {
 }
 
 // Tr translate from a lang by key
-// site.name => [site]
-//  			name = my blog
+//
+// Config:
+//
+//	[site]
+//	name = my blog
+//
+// Read:
+//
+//	site.name => "my blog"
 func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 	if !l.HasLang(lang) {
 		// find from fallback lang
@@ -194,7 +171,7 @@ func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 			return key
 		}
 
-		// if has args for the message
+		// has args for the message
 		if len(args) > 0 {
 			msg = l.renderMessage(msg, args...)
 		}
@@ -213,7 +190,7 @@ func (l *I18n) Tr(lang, key string, args ...interface{}) string {
 		return key
 	}
 
-	// if has args for the message
+	// has args for the message
 	if len(args) > 0 {
 		msg = l.renderMessage(msg, args...)
 	}
@@ -240,6 +217,8 @@ func (l *I18n) transFromFallback(key string) string {
 	return l.data[fl].String(key)
 }
 
+const errMsg = "CANNOT-TO-STRING"
+
 func (l *I18n) renderMessage(msg string, args ...interface{}) string {
 	if l.TransMode == SprintfMode {
 		return fmt.Sprintf(msg, args...)
@@ -255,17 +234,25 @@ func (l *I18n) renderMessage(msg string, args ...interface{}) string {
 	// if args is map[string]interface{}
 	if mp, ok := args[0].(map[string]interface{}); ok {
 		for k, v := range mp {
+			str, err := strutil.ToString(v)
+			if err != nil {
+				str = errMsg
+			}
+
 			ss = append(ss, "{"+k+"}")
-			ss = append(ss, toString(v))
+			ss = append(ss, str)
 		}
 	} else {
 		// if args is: {field1, value1, field2, value2, ...}, try convert all element to string.
 		for i, val := range args {
-			str := toString(val)
+			str, err := strutil.ToString(val)
+			if err != nil {
+				str = errMsg
+			}
+
 			if i%2 == 0 {
 				str = "{" + str + "}"
 			}
-
 			ss = append(ss, str)
 		}
 	}
@@ -273,59 +260,9 @@ func (l *I18n) renderMessage(msg string, args ...interface{}) string {
 	return strings.NewReplacer(ss...).Replace(msg)
 }
 
-// convert value to string
-func toString(val interface{}) (str string) {
-	switch tVal := val.(type) {
-	case int:
-		str = strconv.Itoa(tVal)
-	case int8:
-		str = strconv.Itoa(int(tVal))
-	case int16:
-		str = strconv.Itoa(int(tVal))
-	case int32:
-		str = strconv.Itoa(int(tVal))
-	case int64:
-		str = strconv.Itoa(int(tVal))
-	case uint:
-		str = strconv.Itoa(int(tVal))
-	case uint8:
-		str = strconv.Itoa(int(tVal))
-	case uint16:
-		str = strconv.Itoa(int(tVal))
-	case uint32:
-		str = strconv.Itoa(int(tVal))
-	case uint64:
-		str = strconv.Itoa(int(tVal))
-	case float32:
-		str = fmt.Sprint(tVal)
-	case float64:
-		str = fmt.Sprint(tVal)
-	case string:
-		str = tVal
-	case nil:
-		str = ""
-	default:
-		str = "CANNOT-TO-STRING"
-	}
-	return
-}
-
 /************************************************************
  * data manage
  ************************************************************/
-
-// Init load add language files
-func (l *I18n) Init() *I18n {
-	if l.LoadMode == FileMode {
-		l.loadSingleFiles()
-	} else if l.LoadMode == DirMode {
-		l.loadDirFiles()
-	} else {
-		panic("invalid load mode setting. only allow 0, 1")
-	}
-
-	return l
-}
 
 // load language files when LoadMode is 0
 func (l *I18n) loadSingleFiles() {
@@ -377,27 +314,45 @@ func (l *I18n) loadDirFiles() {
 	}
 }
 
-// Add new language
+// Add register and init new language. alias of NewLang()
 func (l *I18n) Add(lang string, name string) {
 	l.NewLang(lang, name)
 }
 
+// AddLang register and init new language. alias of NewLang()
+func (l *I18n) AddLang(lang string, name string) {
+	l.NewLang(lang, name)
+}
+
+// WithLang register and init new language. alias of NewLang()
+func (l *I18n) WithLang(lang string, name string) *I18n {
+	l.NewLang(lang, name)
+	return l
+}
+
 // NewLang create/add a new language
+//
 // Usage:
-// 	i18n.NewLang("zh-CN", "简体中文")
+//
+//	i18n.NewLang("zh-CN", "简体中文")
 func (l *I18n) NewLang(lang string, name string) {
-	// lang exist
+	// language exist
 	if _, ok := l.languages[lang]; ok {
 		return
 	}
 
+	if name == "" {
+		name = strutil.UpperFirst(lang)
+	}
 	l.data[lang] = ini.New()
 	l.languages[lang] = name
 }
 
 // LoadFile append data to a exist language
+//
 // Usage:
-// 	i18n.LoadFile("zh-CN", "path/to/zh-CN.ini")
+//
+//	i18n.LoadFile("zh-CN", "path/to/zh-CN.ini")
 func (l *I18n) LoadFile(lang string, file string) (err error) {
 	// append data
 	if ld, ok := l.data[lang]; ok {
@@ -413,20 +368,42 @@ func (l *I18n) LoadFile(lang string, file string) (err error) {
 }
 
 // LoadString load language data form a string
+//
 // Usage:
-// 	i18n.Set("zh-CN", "name = blog")
+//
+//	i18n.LoadString("zh-CN", `
+//	name = blog
+//	age = 233
+//	`)
 func (l *I18n) LoadString(lang string, data string) (err error) {
-	// append data
-	if ld, ok := l.data[lang]; ok {
-		err = ld.LoadStrings(data)
-		if err != nil {
-			return
-		}
-	} else {
-		err = errors.New("language" + lang + " not exist, please create it before load data")
+	ld, ok := l.data[lang]
+	if !ok {
+		return errorx.Rawf("language '%s' is not registered", lang)
 	}
 
-	return
+	// append data
+	return ld.LoadStrings(data)
+}
+
+// SetValues to the special language data instance
+func (l *I18n) SetValues(lang, group string, values map[string]string) error {
+	ld, ok := l.data[lang]
+	if !ok {
+		return errorx.Rawf("language '%s' is not registered", lang)
+	}
+
+	if len(values) == 0 {
+		return nil
+	}
+
+	// group name is empty, set to default section
+	if group == "" {
+		group = ld.DefSection()
+	}
+
+	return ld.LoadData(map[string]ini.Section{
+		group: values,
+	})
 }
 
 // Lang get language data instance
