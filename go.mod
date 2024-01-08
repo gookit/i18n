@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/gookit/goutil v0.6.15
-	github.com/gookit/ini/v2 v2.2.2
+	github.com/gookit/ini/v2 v2.2.3
 )
 
 require (
