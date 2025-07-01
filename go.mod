@@ -1,6 +1,6 @@
 module github.com/gookit/i18n
 
-go 1.18
+go 1.21
 
 require (
 	github.com/gookit/goutil v0.7.0
