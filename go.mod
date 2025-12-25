@@ -3,7 +3,7 @@ module github.com/gookit/i18n
 go 1.21
 
 require (
-	github.com/gookit/goutil v0.7.2
+	github.com/gookit/goutil v0.7.3
 	github.com/gookit/ini/v2 v2.3.2
 )
 
