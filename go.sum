@@ -1,7 +1,7 @@
 github.com/go-viper/mapstructure/v2 v2.4.0 h1:EBsztssimR/CONLSZZ04E8qAkxNYq4Qp9LvH92wZUgs=
 github.com/go-viper/mapstructure/v2 v2.4.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
-github.com/gookit/goutil v0.7.2 h1:NSiqWWY+BT0MwIlKDeSVPfQmr9xTkkAqwDjhplobdgo=
-github.com/gookit/goutil v0.7.2/go.mod h1:vJS9HXctYTCLtCsZot5L5xF+O1oR17cDYO9R0HxBmnU=
+github.com/gookit/goutil v0.7.3 h1:nXDd/AB17nEjqVCNDGioDhVL/gVqdlqRMfFergKDjHE=
+github.com/gookit/goutil v0.7.3/go.mod h1:vJS9HXctYTCLtCsZot5L5xF+O1oR17cDYO9R0HxBmnU=
 github.com/gookit/ini/v2 v2.3.2 h1:W6tzOGE6zOLQelH2xhcH8BIBZPtnEpJgQ+J6SsAKBSw=
 github.com/gookit/ini/v2 v2.3.2/go.mod h1:StKSqY5niArRwYBS8Z71+iWUt5ow47qt359sS9YQLYY=
 golang.org/x/sync v0.11.0 h1:GGz8+XQP4FvTTrjZPzNKTMFtSXH80RAzG+5ghFPgK9w=
