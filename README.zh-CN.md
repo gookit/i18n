@@ -109,6 +109,23 @@ func Tr(lang, key string, args ...interface{}) string
 
 ## 参数替换模式
 
+### 从 embed.FS 加载
+
+语言文件可以嵌入二进制，从任意 `fs.FS`（例如 `embed.FS`）加载。`FileMode` 与 `DirMode` 用法一致；语言目录是文件系统内以 `/` 分隔的路径。
+
+```go
+//go:embed lang
+var langFS embed.FS
+
+l := i18n.NewWithFS(langFS, "lang", "en", languages).Init()
+
+// 或者初始化默认实例
+i18n.InitFS(langFS, "lang", "en", languages)
+
+// 向已有语言追加 fs 里的另一个文件
+err := l.LoadFileFS(langFS, "zh-CN", "lang/zh-CN/extra.ini")
+```
+
 ### 使用 `SprintfMode` 模式
 
 默认就是 `SprintfMode` 模式, 内部使用 `fmt.Spritf()` 进行参数的替换处理

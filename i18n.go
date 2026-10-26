@@ -46,8 +46,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/gookit/goutil/errorx"
@@ -78,6 +80,9 @@ type I18n struct {
 
 	// language files directory
 	langDir string
+	// fsys optional file system to load language files from, eg: embed.FS.
+	// When set, langDir is a slash-separated path inside fsys.
+	fsys fs.FS
 	// language list {en:English, zh-CN:简体中文}
 	languages map[string]string
 	// loaded lang files
@@ -127,6 +132,26 @@ func NewEmpty() *I18n {
 // NewWithInit an i18n instance and call init
 func NewWithInit(langDir, defLang string, languages map[string]string) *I18n {
 	return New(langDir, defLang, languages).Init()
+}
+
+// NewWithFS new an i18n instance that loads language files from fsys, eg: embed.FS.
+// Call Init() after setting LoadMode and other options.
+//
+// Usage:
+//
+//	//go:embed lang
+//	var langFS embed.FS
+//
+//	l := i18n.NewWithFS(langFS, "lang", "en", languages).Init()
+func NewWithFS(fsys fs.FS, langDir, defLang string, languages map[string]string) *I18n {
+	return New(langDir, defLang, languages).WithFS(fsys)
+}
+
+// WithFS set the file system to load language files from, eg: embed.FS.
+// A nil fsys restores loading from the OS file system.
+func (l *I18n) WithFS(fsys fs.FS) *I18n {
+	l.fsys = fsys
+	return l
 }
 
 // Config the manager instance
@@ -284,6 +309,10 @@ func (l *I18n) renderMessage(msg string, args ...interface{}) string {
 
 // load language files when LoadMode is 0
 func (l *I18n) loadSingleFiles() {
+	if l.fsys != nil {
+		l.loadSingleFilesFS()
+		return
+	}
 	pathSep := string(os.PathSeparator)
 
 	for lang := range l.languages {
@@ -299,6 +328,10 @@ func (l *I18n) loadSingleFiles() {
 
 // load language files when LoadMode is 1
 func (l *I18n) loadDirFiles() {
+	if l.fsys != nil {
+		l.loadDirFilesFS()
+		return
+	}
 	pathSep := string(os.PathSeparator)
 
 	for lang := range l.languages {
@@ -330,6 +363,53 @@ func (l *I18n) loadDirFiles() {
 			}
 		}
 	}
+}
+
+// load language files from l.fsys when LoadMode is 0
+func (l *I18n) loadSingleFilesFS() {
+	for lang := range l.languages {
+		lData := ini.New()
+		if err := loadFileFS(lData, l.fsys, path.Join(l.langDir, lang+".ini")); err != nil {
+			panic("fail to load language: " + lang + ", error " + err.Error())
+		}
+		l.data[lang] = lData
+	}
+}
+
+// load language files from l.fsys when LoadMode is 1
+func (l *I18n) loadDirFilesFS() {
+	for lang := range l.languages {
+		dirPath := path.Join(l.langDir, lang)
+		entries, err := fs.ReadDir(l.fsys, dirPath)
+		if err != nil {
+			panic("read dir fail: " + dirPath + ", error " + err.Error())
+		}
+
+		sl := l.data[lang]
+		for _, ent := range entries {
+			// skip dir and filter the specified format
+			if ent.IsDir() || !strings.HasSuffix(ent.Name(), ".ini") {
+				continue
+			}
+			// create the language data on its first file, like loadDirFiles
+			if sl == nil {
+				sl = ini.New()
+				l.data[lang] = sl
+			}
+			if err := loadFileFS(sl, l.fsys, path.Join(dirPath, ent.Name())); err != nil {
+				panic("fail to load language file: " + lang + ", error " + err.Error())
+			}
+		}
+	}
+}
+
+// loadFileFS read one INI file from fsys and append it to the language data.
+func loadFileFS(ld *ini.Ini, fsys fs.FS, file string) error {
+	bs, err := fs.ReadFile(fsys, file)
+	if err != nil {
+		return err
+	}
+	return ld.LoadStrings(string(bs))
 }
 
 // Add register and init new language. alias of NewLang()
@@ -383,6 +463,19 @@ func (l *I18n) LoadFile(lang string, file string) (err error) {
 	}
 
 	return
+}
+
+// LoadFileFS append data from a file in fsys (eg: embed.FS) to an exist language
+//
+// Usage:
+//
+//	i18n.LoadFileFS(langFS, "zh-CN", "lang/zh-CN/extra.ini")
+func (l *I18n) LoadFileFS(fsys fs.FS, lang string, file string) error {
+	ld, ok := l.data[lang]
+	if !ok {
+		return errorx.Rawf("language '%s' is not registered", lang)
+	}
+	return loadFileFS(ld, fsys, file)
 }
 
 // LoadString load language data form a string

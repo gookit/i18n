@@ -1,6 +1,10 @@
 package i18n
 
-import "github.com/gookit/ini/v2"
+import (
+	"io/fs"
+
+	"github.com/gookit/ini/v2"
+)
 
 /************************************************************
  * default instance
@@ -25,6 +29,13 @@ func Init(langDir, defLang string, languages map[string]string) *I18n {
 	std.DefaultLang = defLang
 
 	return std.Init()
+}
+
+// InitFS init the default language instance, loading language files from fsys (eg: embed.FS).
+// langDir is a slash-separated path inside fsys.
+func InitFS(fsys fs.FS, langDir, defLang string, languages map[string]string) *I18n {
+	std.fsys = fsys
+	return Init(langDir, defLang, languages)
 }
 
 // Config the default instance

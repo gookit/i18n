@@ -78,6 +78,23 @@ i18n.Init("conf/lang", "en", languages)
 // i18n.NewEmpty()
 ```
 
+### Load from embed.FS
+
+Language files can be embedded in the binary and loaded from any `fs.FS` (eg: `embed.FS`). Both `FileMode` and `DirMode` work the same way; the language dir is a slash-separated path inside the file system.
+
+```go
+//go:embed lang
+var langFS embed.FS
+
+l := i18n.NewWithFS(langFS, "lang", "en", languages).Init()
+
+// or init the default instance
+i18n.InitFS(langFS, "lang", "en", languages)
+
+// append another file in the fs to an exist language
+err := l.LoadFileFS(langFS, "zh-CN", "lang/zh-CN/extra.ini")
+```
+
 ### Translate message
 
 ```go
